@@ -13,8 +13,8 @@ import org.opencv.highgui.VideoCapture;
 
 /*****************************************************************************
  * THIS CLASS IS FOR INITIALIZING AND CONTROLLING THE RTSP STREAM. IT PROVIDES
- * FUNTIONS FOR CONNECTING TO THE RTSP SOURCE, PARSING THE STREAM AND FINALLY
- * STOPPING THE CLIENT | AUTHOR : ARJUN ASSI
+ * FUNCTIONS FOR CONNECTING TO THE RTSP SOURCE, PARSING THE STREAM AND FINALLY
+ * STOPPING THE CLIENT. | AUTHOR : ARJUN ASSI
  *****************************************************************************/
 
 public class RTSPHandler {
@@ -91,14 +91,16 @@ public class RTSPHandler {
 	 *************************************************************************/
 	public BufferedImage parseStream() {
 
-		// Initialize the frame presence as true
-		boolean hasFrame = true;
+		// Variable to check whether the input stream has got any frames
+		boolean hasFrame;
 
 		// Read the next frame from the stream
 		hasFrame = videoCapture.read(mat);
 
 		// If the frame is not present return null
 		if (!hasFrame) {
+			// Log the end of frame as a warning
+			log.warn("End of stream reached");
 			return null;
 		}
 
@@ -119,8 +121,8 @@ public class RTSPHandler {
 	}
 
 	/*********************************************************************
-	 * THIS FUNCTIONS STOPS THE CLIENT FROM RECEIVING ANY MORE FRAMES. THE
-	 * CONNECTION TO THE CLIENT IS STILL OPEN THOUGH
+	 * THIS FUNCTION STOPS THE CLIENT FROM RECEIVING ANY MORE FRAMES. THE
+	 * CONNECTION TO THE SOURCE IS STILL OPEN THOUGH
 	 *********************************************************************/
 	public void stopClient() {
 

@@ -5,8 +5,8 @@ import jade.util.leap.Serializable;
 
 /******************************************************************************
  * THIS CLASS IS FOR STORING THE MESSAGE STRUCTURE THAT IS GOING TO BE SENT TO
- * THE RECEIVER AGENT. IT HAS THE TIME STAMOP AND THE FRAME AS A BUFFERED IMAGE
- * OBJECT. AUTHOR : ARJUN ASSI
+ * THE RECEIVER AGENT. IT HAS THE TIME STAMP AND THE FRAME AS A BUFFERED IMAGE
+ * OBJECT. | AUTHOR : ARJUN ASSI
  ******************************************************************************/
 
 public class MessageBean implements Serializable {

@@ -16,10 +16,10 @@ import redis.clients.jedis.Jedis;
 import com.musigma.ird.message.MessageBean;
 
 /*******************************************************************************
- * THIS CLASS IS FOR INITIALIZING AND CONTROLLING THE STORAGE OF THERTSP STREAM.
- * IT PROVIDES FUNTIONS FOR WRITING THE RTSP STREAM TO A REDIS SERVER, A FLAT
- * FILE AND TO A QUEUE. IT ALSO KEEPS TRACK OF THE STORAGE DETAILS. AMD STORES
- * THIS METADATA IN A POSTGRE DATABASE | AUTHOR : ARJUN ASSI
+ * THIS CLASS IS FOR INITIALIZING AND CONTROLLING THE STORAGE OF THE RTSP
+ * STREAM. IT PROVIDES FUNCTIONS FOR WRITING THE RTSP STREAM TO A REDIS SERVER
+ * AND TO A QUEUE. IT ALSO KEEPS TRACK OF THE STORAGE DETAILS AND STORES THIS
+ * METADATA IN A POSTGRE DATABASE. | AUTHOR : ARJUN ASSI
  *******************************************************************************/
 
 public class StreamStorageSetup {
@@ -37,13 +37,13 @@ public class StreamStorageSetup {
 	// Topic of the ActiveMQ
 	private String nameQueue;
 
-	// Uri of the meta data database postgres
+	// Uri of the meta data database postgre
 	private String uriMetaDB;
 
-	// Username
+	// Username Metadata DB
 	private String userNameMetaDB;
 
-	// Password
+	// Password Metadata DB
 	private String passwordMetaDB;
 
 	// Database name
@@ -135,13 +135,17 @@ public class StreamStorageSetup {
 	public Jedis setupRedis() {
 
 		// Create and return a Jedis object(Java wrapper for Redis)
-		return (new Jedis(uriRedis));
+		Jedis jedis = new Jedis(uriRedis);
+		log.info("Created a Redis connection");
+
+		// Return the Connection object
+		return jedis;
 	}
 
-	/*************************************************************************
-	 * THIS FUNCTION INSERTS A FRAME AS A STRING WITH THE TIMESTAMP AS THE KEY
-	 * IN THE REDIS SERVER
-	 *************************************************************************/
+	/***************************************************************************
+	 * THIS FUNCTION INSERTS A FRAME AS A STRING AND THE TIMESTAMP AS THE KEY IN
+	 * THE REDIS SERVER
+	 ***************************************************************************/
 	public void pushToRedis(Jedis jedis, MessageBean messageBean) {
 
 		// Insert the Message bean as atime stamp and frame
@@ -149,10 +153,14 @@ public class StreamStorageSetup {
 				.toString());
 	}
 
+	/*********************************************************
+	 * THIS FUNCTION CLOSES THE CONNECTION TO THE REDIS SERVER
+	 *********************************************************/
 	public void closeRedis(Jedis jedis) {
 
 		// Close the connection to the redis server
 		jedis.close();
+		log.info("Connection to Redis closed");
 	}
 
 	/*************************************************************************
@@ -176,6 +184,7 @@ public class StreamStorageSetup {
 			log.error(e);
 		}
 
+		log.info("ActiveMQ setup at the uri : " + uriQueue);
 		// return the jms connection object
 		return connection;
 	}
@@ -222,6 +231,7 @@ public class StreamStorageSetup {
 		// Close the connection
 		try {
 			connection.close();
+			log.info("ActiveMQ disconnected at the uri : " + uriQueue);
 		} catch (JMSException e) {
 			log.error(e);
 		}
@@ -259,6 +269,9 @@ public class StreamStorageSetup {
 			log.error(e);
 		}
 
+		log.info("The metadatabase has been set up at :" + uriMetaDB + "/"
+				+ databaseNameMetaDB);
+
 		// Return the connection object
 		return connection;
 	}
@@ -294,6 +307,8 @@ public class StreamStorageSetup {
 
 			// Close the connection to jdbc
 			connection.close();
+			log.info("The metadatabase has been disconnected :" + uriMetaDB
+					+ "/" + databaseNameMetaDB);
 		} catch (SQLException e) {
 			log.error(e);
 		}
