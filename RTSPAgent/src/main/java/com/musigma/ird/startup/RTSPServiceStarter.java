@@ -8,6 +8,7 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import org.apache.log4j.Logger;
 import com.musigma.ird.agent.RTSPAgent;
+import com.musigma.ird.setup.ConfigSetup;
 
 /*******************************************************************************
  * THIS IS MAIN STARTER CLASS. IT IS RESPONSIBLE FOR INITIALIZING THE JADE MAIN
@@ -26,11 +27,11 @@ public class RTSPServiceStarter {
 	private String HOST_NAME;
 	private String PORT;
 
-	// Jade profile variable to lauch the conatiner onthe above mentioned ip and
-	// port
+	// Jade profile variable to lauch the conatiner on the above mentioned ip
+	// and port
 	private static Profile profile;
 
-	// handle for main container
+	// Handle for main container
 	private static ContainerController mainContainer;
 
 	// Jade runtine instance
@@ -123,7 +124,11 @@ public class RTSPServiceStarter {
 	/****************
 	 * MAIN FUNCTION
 	 ****************/
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
+
+		// Load the properties file
+		ConfigSetup.loadProperty();
 
 		// Create Service starter object - arg[0] is hostname , args[1] is port
 		RTSPServiceStarter rtspServiceStarter = new RTSPServiceStarter(args[0],
@@ -136,8 +141,5 @@ public class RTSPServiceStarter {
 		// Set up and start the RTSP Agent
 		AgentController agentController = rtspServiceStarter
 				.RTSPAgentStartup(containerController);
-
-		// Kill the RTSP Agent
-		rtspServiceStarter.RTSPAgentkill(agentController);
 	}
 }

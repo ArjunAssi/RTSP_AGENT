@@ -128,10 +128,10 @@ public class StreamStorageSetup {
 		this.uriRedis = uriRedis;
 	}
 
-	/***********************************************************************
-	 * THIS FUNCTION SETS UP A CONNECTION TO THE REDIS SERVER IDENTIFIED THE
+	/***************************************************************************
+	 * THIS FUNCTION SETS UP A CONNECTION TO THE REDIS SERVER IDENTIFIED BY THE
 	 * REDIS URI. IT RETURNS A REDIS CONNECTION OBJECT
-	 ***********************************************************************/
+	 ***************************************************************************/
 	public Jedis setupRedis() {
 
 		// Create and return a Jedis object(Java wrapper for Redis)
@@ -149,8 +149,9 @@ public class StreamStorageSetup {
 	public void pushToRedis(Jedis jedis, MessageBean messageBean) {
 
 		// Insert the Message bean as atime stamp and frame
-		jedis.set(messageBean.getTimeStamp().toString(), messageBean.getImage()
-				.toString());
+		jedis.set(messageBean.getTimeStamp().toString(), messageBean
+				.getByteArray().toString());
+		System.out.println("Successfully pushed to redis");
 	}
 
 	/*********************************************************
@@ -165,73 +166,134 @@ public class StreamStorageSetup {
 
 	/*************************************************************************
 	 * THIS FUNCTION CREATES A JMS CONNECTION BASED ON THE URI OF ACTIVEMQ AND
-	 * RETURNS THE CONNECTION OBJECT
+	 * RETURNS THE SESSION OBJECT
 	 *************************************************************************/
-	public javax.jms.Connection setupActiveMQ() {
+	public Session setupActiveMQ() {
 
 		// Initialize the jms connection object
 		javax.jms.Connection connection = null;
 
+		// Initialize the session
+		Session session = null;
+
 		// Create a connection object for the ActiveMQ
 		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
-				uriQueue);
+				ActiveMQConnectionFactory.DEFAULT_BROKER_URL);
 
 		// Start the jms connection
 		try {
 			connection = connectionFactory.createConnection();
 			connection.start();
+
+			// Create a session
+			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
 		} catch (JMSException e) {
 			log.error(e);
 		}
 
 		log.info("ActiveMQ setup at the uri : " + uriQueue);
-		// return the jms connection object
-		return connection;
+
+		// Return the jms connection object
+		return session;
+
 	}
 
-	/***************************************************************************
-	 * THIS FUNCTION IS FOR PUSHING THE FRAME ALONG WITH ITS TIME STAMP TO QUEUE
-	 * SO THAT IT CAN BE READ BY ANY SUBSCRIBER
-	 ***************************************************************************/
-	public void pushToActiveMQ(javax.jms.Connection connection,
-			String nameQueue, MessageBean messageBean) {
+	/*************************************************************************
+	 * THIS FUNCTION CREATES A QUEUE BASED ON THE URI OF ACTIVEMQ AND RETURNS
+	 * THE QUEUE OBJECT
+	 *************************************************************************/
+	public Queue CreateActiveMQQueue(Session session, String nameQueue) {
 
-		// Initialize a session of ActiveMQ
-		Session session = null;
+		// Initialize the queue object
+		Queue queue = null;
 
+		// Create a queue
 		try {
-			// Create the sesssion
-			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			queue = session.createQueue(nameQueue);
 
-			// Create a queue
-			Queue queue = session.createQueue(nameQueue);
-
-			// Create a message object
-			MessageProducer messageProducer = session.createProducer(queue);
-			Message message = session.createMessage();
-
-			// Set the time stamp and the image object in the queue
-			message.setLongProperty("TimeStamp", messageBean.getTimeStamp());
-			message.setObjectProperty("Image", messageBean.getImage());
-
-			// Push the message to the Queue
-			messageProducer.send(message);
 		} catch (JMSException e) {
 			log.error(e);
 		}
 
+		// Return the queue object
+		return queue;
+	}
+
+	/*************************************************************************
+	 * THIS FUNCTION CREATES AN ACTIVE MQ MESSAGE PRODUCER BASED ON THE URI OF
+	 * ACTIVEMQ AND RETURNS THAT OBJECT
+	 *************************************************************************/
+	public MessageProducer createMessageProducerActiveMQ(Queue queue,
+			Session session) {
+
+		// Initialize the messageProducer object
+		MessageProducer messageProducer = null;
+
+		// Create a message producer for the session and queue
+		try {
+			messageProducer = session.createProducer(queue);
+
+		} catch (JMSException e) {
+			log.error(e);
+		}
+
+		// Return the object
+		return messageProducer;
 	}
 
 	/**************************************************************************
-	 * THIS FUNCTION CLOSES THE CONNECTION TO THE QUEUE TO WHICH THE FRAMES ARE
+	 * THIS FUNCTION CREATES A MESSAGE BASED ON THE URI OF ACTIVEMQ AND RETURNS
+	 * THAT OBJECT
+	 **************************************************************************/
+	public Message createActiveMQMessage(Session session) {
+
+		// Initialize the message object
+		Message message = null;
+
+		// Create the message
+		try {
+			message = session.createMessage();
+
+		} catch (JMSException e) {
+			log.error(e);
+		}
+
+		// Return the message object
+		return message;
+	}
+
+	/****************************************************************************
+	 * THIS FUNCTION PUSHES A MESSAGE TO ACTIVE MQ BASED ON THE MESSAGE PRODUCER
+	 ****************************************************************************/
+	public void pushToActiveMQ(Message message,
+			MessageProducer messageProducer, MessageBean messageBean) {
+
+		// Set the time stamp and the image object in the queue
+		try {
+			message.setLongProperty("TimeStamp", messageBean.getTimeStamp());
+			message.setStringProperty("Image", messageBean.getByteArray()
+					.toString());
+
+			// Push the message to the Queue
+			messageProducer.send(message);
+
+		} catch (JMSException e) {
+			log.error(e);
+		}
+	}
+
+	/**************************************************************************
+	 * THIS FUNCTION CLOSES THE SESSION TO THE QUEUE TO WHICH THE FRAMES ARE
 	 * BEING WRITTEN
 	 **************************************************************************/
-	public void closeActiveMQ(javax.jms.Connection connection) {
+	public void closeActiveMQ(Session session) {
 
-		// Close the connection
+		// Close the session
 		try {
-			connection.close();
-			log.info("ActiveMQ disconnected at the uri : " + uriQueue);
+			session.close();
+			log.info("ActiveMQ session disconnected at the uri : " + uriQueue);
+
 		} catch (JMSException e) {
 			log.error(e);
 		}
@@ -249,8 +311,12 @@ public class StreamStorageSetup {
 		// Database statement object to execute sql queries
 		Statement statement = null;
 		try {
+
+			// Register Driver
+			DriverManager.registerDriver(new org.postgresql.Driver());
+
 			// Establish connection
-			connection = DriverManager.getConnection(uriMetaDB + "/"
+			connection = DriverManager.getConnection(uriMetaDB
 					+ databaseNameMetaDB, userNameMetaDB, passwordMetaDB);
 			log.info("Opened database successfully");
 
@@ -259,12 +325,13 @@ public class StreamStorageSetup {
 
 			// Sql query to create the table
 			String sqlQuery = "CREATE TABLE " + tableNameMetaDB
-					+ "(STREAM_STORAGE_TYPE CHAR(50) PRIMARY KEY NOT NULL,"
+					+ " (STREAM_STORAGE_TYPE CHAR(50) PRIMARY KEY NOT NULL, "
 					+ "URI_DETAILS CHAR(50) NOT NULL);";
 
 			// Execute the query and close the statement object
 			statement.execute(sqlQuery);
 			statement.close();
+
 		} catch (SQLException e) {
 			log.error(e);
 		}
@@ -285,22 +352,25 @@ public class StreamStorageSetup {
 
 		// Create the statement object
 		try {
+
 			Statement statement = connection.createStatement();
 
 			// Query to execute the insert operation in the table
-			String sqlQuery = "INSERT INTO " + tableNameMetaDB + "VALUES ("
-					+ Storage_type + "," + URI + " );";
+			String sqlQuery = "INSERT INTO " + tableNameMetaDB
+					+ " (STREAM_STORAGE_TYPE,URI_DETAILS)" + " VALUES (" + "'"
+					+ Storage_type + "'" + "," + "'" + URI + "'" + " );";
 
 			// Execute the query and close the statement object
 			statement.execute(sqlQuery);
 			statement.close();
+
 		} catch (SQLException e) {
 			log.error(e);
 		}
 	}
 
 	/*************************************************************
-	 * THIS FUNTION CLOSES THE CONNECTION TO THE METADATA DATABASE
+	 * THIS FUNCTION CLOSES THE CONNECTION TO THE METADATA DATABASE
 	 *************************************************************/
 	public void closeMetaDB(Connection connection) {
 		try {
@@ -308,7 +378,8 @@ public class StreamStorageSetup {
 			// Close the connection to jdbc
 			connection.close();
 			log.info("The metadatabase has been disconnected :" + uriMetaDB
-					+ "/" + databaseNameMetaDB);
+					+ databaseNameMetaDB);
+
 		} catch (SQLException e) {
 			log.error(e);
 		}

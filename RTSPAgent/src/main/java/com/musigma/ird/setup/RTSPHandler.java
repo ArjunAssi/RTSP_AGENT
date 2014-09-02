@@ -1,9 +1,5 @@
 package com.musigma.ird.setup;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -24,7 +20,7 @@ public class RTSPHandler {
 	 *******************/
 
 	// This represents the rtsp stream source. eg: rtsp://ip:port/
-	private String sourceURI;
+	private static String sourceURI;
 
 	// Videocapture object provided by openCV. Used to open the rtsp stream
 	private VideoCapture videoCapture;
@@ -36,14 +32,8 @@ public class RTSPHandler {
 	// array
 	private MatOfByte matOfByte;
 
-	// Object to store the byte stream as a buffered image object
-	private BufferedImage bufferedImage;
-
 	// To store the image as a byte array
 	private byte[] byteArray;
-
-	// To get an input stream for the corresponding byte array
-	private InputStream inputStream;
 
 	// Logger object
 	private static org.apache.log4j.Logger log = Logger
@@ -57,7 +47,7 @@ public class RTSPHandler {
 	 * THIS FUNCTION LOADS THE NATIVE LIBRARY WHICH ALLOWS FOR ACCESSING THE
 	 * OPENCV RELATED FUNCTIONS AND OBJECTS
 	 ***********************************************************************/
-	public static void loadNativeLibrary() {
+	public void loadNativeLibrary() {
 
 		// Load the native library
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -76,8 +66,12 @@ public class RTSPHandler {
 		// Open the rtsp stream
 		videoCapture.open(sourceURI);
 
+		// Initialize the Mat object
+		mat = new Mat();
+		matOfByte = new MatOfByte();
+
 		// Log the outcome
-		if (!videoCapture.isOpened())
+		if (videoCapture.isOpened())
 			log.info("Connected to the source stream : " + sourceURI);
 		else
 			log.error("Could not open the source stream : " + sourceURI);
@@ -86,10 +80,9 @@ public class RTSPHandler {
 	/*************************************************************************
 	 * THIS FUNCTION PARSES THE INPUT STREAM BY EXTRACTING THE NEXT FRAME FROM
 	 * THE RTSP STREAM. IT THEN CONVERTS THE FRAME INTO A BYTE ARRAY AND THEN
-	 * INTO A BUFFERED IMAGE AND RETURNS THE BUFFERED IMAGE OBJECT. IF IT DOES
-	 * NOT FIND A FRAME, IT RETURNS NULL
+	 * RETURNS THE OBJECT. IF IT DOES NOT FIND A FRAME, IT RETURNS NULL
 	 *************************************************************************/
-	public BufferedImage parseStream() {
+	public byte[] parseStream() {
 
 		// Variable to check whether the input stream has got any frames
 		boolean hasFrame;
@@ -108,16 +101,8 @@ public class RTSPHandler {
 		Highgui.imencode(".jpg", mat, matOfByte);
 		byteArray = matOfByte.toArray();
 
-		// Convert the byte array into a buffered image
-		try {
-			inputStream = new ByteArrayInputStream(byteArray);
-			bufferedImage = ImageIO.read(inputStream);
-		} catch (Exception e) {
-			log.error(e);
-		}
-
-		// Return the buffered image object
-		return bufferedImage;
+		// Return the byte array object
+		return byteArray;
 	}
 
 	/*********************************************************************
