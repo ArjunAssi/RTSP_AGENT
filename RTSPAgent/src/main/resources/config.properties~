@@ -23,6 +23,12 @@ storeToActiveMQFlag = true
 uriQueue = vm://localhost:2020/
 nameQueue = RTSPSTREAMER
 
+# Flat file details
+
+storeToFlatFileFlag = true
+locationFile =
+linesInFile =
+
 # Receiver Agent's name
 
 receiverAgent = RTSPConsumer

@@ -3,14 +3,20 @@ package com.musigma.ird.behaviours;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.sql.Connection;
+
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+
 import org.apache.log4j.Logger;
+
 import redis.clients.jedis.Jedis;
+
 import com.musigma.ird.message.MessageBean;
 import com.musigma.ird.setup.Declarations;
 import com.musigma.ird.setup.RTSPHandler;
@@ -60,6 +66,9 @@ public class RTSPAgentBehaviour extends CyclicBehaviour {
 	// Acl message object
 	ACLMessage aclMessage;
 
+	// Object to write to the flat file
+	BufferedWriter bufferedWriter;
+
 	// Logger object
 	private static org.apache.log4j.Logger log = Logger
 			.getLogger(RTSPAgentBehaviour.class.getName());
@@ -71,12 +80,15 @@ public class RTSPAgentBehaviour extends CyclicBehaviour {
 	/********************************************************************
 	 * THIS IS THE CONCTRUCTOR METHOD FOR THIS BEHAVIOUR. IT ASSIGNS THE
 	 * ARGUMENTS PASSED FROM THE SETUP FUNCTION TO THE BEHAVIOUR
+	 * 
+	 * @param bufferedWriter
 	 ********************************************************************/
 	public RTSPAgentBehaviour(ACLMessage aclMessage,
 			StreamStorageSetup streamStorageSetup, Connection connectionDB,
 			Jedis jedis, Session session, Queue queue,
 			MessageProducer messageProducer, Message message,
-			RTSPHandler rtspHandler, MessageBean messageBean) {
+			RTSPHandler rtspHandler, MessageBean messageBean,
+			BufferedWriter bufferedWriter) {
 
 		// Initialize the class variables
 		this.streamStorageSetup = streamStorageSetup;
@@ -89,6 +101,7 @@ public class RTSPAgentBehaviour extends CyclicBehaviour {
 		this.message = message;
 		this.queue = queue;
 		this.aclMessage = aclMessage;
+		this.bufferedWriter = bufferedWriter;
 
 	}
 
@@ -145,6 +158,12 @@ public class RTSPAgentBehaviour extends CyclicBehaviour {
 				// Store the info in ActiveMQ
 				streamStorageSetup.pushToActiveMQ(message, messageProducer,
 						messageBean);
+			}
+
+			if (Declarations.storeToFlatFileFlag.equals("true")) {
+
+				// Store the stream in flat file
+				streamStorageSetup.writeToFile(bufferedWriter, messageBean);
 			}
 		}
 

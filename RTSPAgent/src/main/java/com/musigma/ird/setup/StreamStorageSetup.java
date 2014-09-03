@@ -1,5 +1,9 @@
 package com.musigma.ird.setup;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -17,9 +21,9 @@ import com.musigma.ird.message.MessageBean;
 
 /*******************************************************************************
  * THIS CLASS IS FOR INITIALIZING AND CONTROLLING THE STORAGE OF THE RTSP
- * STREAM. IT PROVIDES FUNCTIONS FOR WRITING THE RTSP STREAM TO A REDIS SERVER
- * AND TO A QUEUE. IT ALSO KEEPS TRACK OF THE STORAGE DETAILS AND STORES THIS
- * METADATA IN A POSTGRE DATABASE. | AUTHOR : ARJUN ASSI
+ * STREAM. IT PROVIDES FUNCTIONS FOR WRITING THE RTSP STREAM TO A REDIS SERVER,
+ * A FLAT FILE AND TO A QUEUE. IT ALSO KEEPS TRACK OF THE STORAGE DETAILS AND
+ * STORES THIS METADATA IN A POSTGRE DATABASE. | AUTHOR : ARJUN ASSI
  *******************************************************************************/
 
 public class StreamStorageSetup {
@@ -39,6 +43,15 @@ public class StreamStorageSetup {
 
 	// Uri of the meta data database postgre
 	private String uriMetaDB;
+
+	// Location and name of the flat file to store the data
+	private String locationFile;
+
+	// Number of lines before the override happens
+	private int linesInFile;
+
+	// Curent line number in the file
+	private int currentLine;
 
 	// Username Metadata DB
 	private String userNameMetaDB;
@@ -126,6 +139,30 @@ public class StreamStorageSetup {
 
 	public void setUriRedis(String uriRedis) {
 		this.uriRedis = uriRedis;
+	}
+
+	public String getLocationFile() {
+		return locationFile;
+	}
+
+	public void setLocationFile(String locationFile) {
+		this.locationFile = locationFile;
+	}
+
+	public int getLinesInFile() {
+		return linesInFile;
+	}
+
+	public void setLinesInFile(int linesInFile) {
+		this.linesInFile = linesInFile;
+	}
+
+	public int getCurrentLine() {
+		return currentLine;
+	}
+
+	public void setCurrentLine(int currentLine) {
+		this.currentLine = currentLine;
 	}
 
 	/***************************************************************************
@@ -295,6 +332,89 @@ public class StreamStorageSetup {
 			log.info("ActiveMQ session disconnected at the uri : " + uriQueue);
 
 		} catch (JMSException e) {
+			log.error(e);
+		}
+	}
+
+	/*************************************************************************
+	 * THIS FUNCTION IS FOR SETTING UP A FILE SPECIFIED IN THE PROPERTIES FILE
+	 * THIS PROVIDES A CONNECTION OBJECT THAT CAN BE USED TO APPEND VALUES TO
+	 * THE FILE
+	 *************************************************************************/
+	public BufferedWriter setupFlatFile() {
+
+		// Buffered writer to write to the file
+		BufferedWriter bufferedWriter = null;
+
+		// File object to write to the file
+		File file = new File(locationFile);
+
+		// Initialize the current line number to 1
+		currentLine = 1;
+
+		// Initialize the buffered writer object to point to the file
+		try {
+			bufferedWriter = new BufferedWriter(new FileWriter(file, true));
+
+		} catch (IOException e) {
+			log.error(e);
+		}
+
+		log.info("Flat file setup : " + locationFile);
+
+		// Return the Buffered Writer object
+		return bufferedWriter;
+
+	}
+
+	/***************************************************************************
+	 * THIS FUNCTION WRITES TO A FILE TILL THE SPECIFIED LINE NUMBER IS
+	 * MENTIONED, POST WHICH IT OVERWRITES THE EXISTING FILE FROM THE FIRST LINE
+	 ****************************************************************************/
+	public void writeToFile(BufferedWriter bufferedWriter,
+			MessageBean messageBean) {
+
+		try {
+
+			// Check if the number of lines have reached the limit
+			if (currentLine < linesInFile) {
+
+				// Append to the file in this case and increment the line number
+				bufferedWriter.write(messageBean.getTimeStamp() + " "
+						+ messageBean.getByteArray());
+			} else {
+
+				// Create a new temporary buffered writer and override the file
+				// and then input the new data from the first line
+				BufferedWriter bufferedWriterToOveride = new BufferedWriter(
+						new FileWriter(locationFile, true));
+
+				// Write to the file
+				bufferedWriterToOveride.write(messageBean.getTimeStamp() + " "
+						+ messageBean.getByteArray());
+
+				// Set the current line number to 1 again
+				currentLine = 1;
+
+				// Close the temporary buffered writer
+				bufferedWriterToOveride.close();
+			}
+		} catch (IOException e) {
+			log.error(e);
+		}
+	}
+
+	/******************************************************
+	 * THIS FUNTION CLOSES THE CONNECTION TO THE FLAT FILE
+	 ******************************************************/
+	public void closeFlatFile(BufferedWriter bufferedWriter) {
+
+		// Close the buffered writer
+		try {
+			bufferedWriter.close();
+			log.info("Flat file closed : " + locationFile);
+
+		} catch (IOException e) {
 			log.error(e);
 		}
 	}

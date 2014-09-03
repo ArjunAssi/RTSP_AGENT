@@ -46,7 +46,16 @@ public class Declarations {
 	// Meta DB access flag
 	public static String storeToMetaDBFlag;
 
+	// Store to flat file flag
+	public static String storeToFlatFileFlag;
+
 	// RTSP receiver agent local name
 	public static String receiverAgent;
+
+	// Location and name of the flat file to store the data
+	public static String locationFile;
+
+	// Number of lines before the override happens
+	public static int linesInFile;
 
 }

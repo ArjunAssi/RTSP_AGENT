@@ -79,11 +79,20 @@ public class ConfigSetup {
 		// Name of the Queue
 		Declarations.nameQueue = properties.getProperty("nameQueue");
 
+		// Flat file location
+		Declarations.locationFile = properties.getProperty("locationFile");
+
+		// Flat file length
+		Declarations.linesInFile = Integer.parseInt(properties
+				.getProperty("linesInFile"));
+
 		// Storage type flag
 		Declarations.storeToRedisFlag = properties
 				.getProperty("storeToRedisFlag");
 		Declarations.storeToActiveMQFlag = properties
 				.getProperty("storeToActiveMQFlag");
+		Declarations.storeToFlatFileFlag = properties
+				.getProperty("storeToFlatFileFlag");
 		Declarations.storeToMetaDBFlag = properties
 				.getProperty("storeToMetaDBFlag");
 

@@ -1,15 +1,21 @@
 package com.musigma.ird.agent;
 
+import java.io.BufferedWriter;
 import java.sql.Connection;
+
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
+
 import org.apache.log4j.Logger;
+
 import redis.clients.jedis.Jedis;
+
 import com.musigma.ird.behaviours.RTSPAgentBehaviour;
 import com.musigma.ird.message.MessageBean;
 import com.musigma.ird.setup.Declarations;
@@ -54,6 +60,9 @@ public class RTSPAgent extends Agent {
 
 	// Queue
 	private Queue queue;
+
+	// buffered writer to write to the flat file
+	private BufferedWriter bufferedWriter;
 
 	// RTSP handler object to parse the stream
 	private RTSPHandler rtspHandler;
@@ -140,6 +149,17 @@ public class RTSPAgent extends Agent {
 		// create a message
 		message = streamStorageSetup.createActiveMQMessage(session);
 
+		/*******************
+		 * SET UP FLAT FILE
+		 *******************/
+
+		// Setup the Flat File
+		streamStorageSetup.setLocationFile(Declarations.locationFile);
+		streamStorageSetup.setLinesInFile(Declarations.linesInFile);
+
+		// Connect to the file
+		bufferedWriter = streamStorageSetup.setupFlatFile();
+
 		/*****************
 		 * UPDATE META DB
 		 *****************/
@@ -169,7 +189,7 @@ public class RTSPAgent extends Agent {
 		// cyclic behaviour
 		addBehaviour(new RTSPAgentBehaviour(aclMessage, streamStorageSetup,
 				connectionDB, jedis, session, queue, messageProducer, message,
-				rtspHandler, messageBean));
+				rtspHandler, messageBean, bufferedWriter));
 
 		// Log the outcome once the behviour is setup
 		log.info("Created the RTSP Agent and added its behaviour");
