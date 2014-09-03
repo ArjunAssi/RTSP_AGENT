@@ -2,20 +2,15 @@ package com.musigma.ird.agent;
 
 import java.io.BufferedWriter;
 import java.sql.Connection;
-
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
-
 import jade.core.AID;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
-
 import org.apache.log4j.Logger;
-
 import redis.clients.jedis.Jedis;
-
 import com.musigma.ird.behaviours.RTSPAgentBehaviour;
 import com.musigma.ird.message.MessageBean;
 import com.musigma.ird.setup.Declarations;
