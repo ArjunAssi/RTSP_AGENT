@@ -164,11 +164,20 @@ public class RTSPAgent extends Agent {
 		 * UPDATE META DB
 		 *****************/
 
-		// Update the storage details in metadb
+		// Redis
 		streamStorageSetup.updateMetaDB(connectionDB, "Redis",
 				streamStorageSetup.getUriRedis());
+
+		// ActiveMQ
 		streamStorageSetup.updateMetaDB(connectionDB, "ActiveMQ",
 				streamStorageSetup.getUriQueue());
+
+		// FlatFile
+		streamStorageSetup.updateMetaDB(connectionDB, "FlatFile",
+				streamStorageSetup.getLocationFile());
+
+		// Close MetaDB
+		streamStorageSetup.closeMetaDB(connectionDB);
 
 		/*********************
 		 * RTSP HANDLER SETUP

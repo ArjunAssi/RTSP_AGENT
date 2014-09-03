@@ -31,7 +31,7 @@
   </class>  
   <class id="4" language="java" name="com.musigma.ird.setup.StreamStorageSetup" project="RTSPAgent" 
     file="/RTSPAgent/src/main/java/com/musigma/ird/setup/StreamStorageSetup.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="750" width="393" x="871" y="-288"/>    
+    <position height="764" width="393" x="871" y="-288"/>    
     <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -75,108 +75,101 @@
     </display>  
   </class>  
   <association id="9">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="10" name="rtspHandler"/>      
+      <multiplicity id="11" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="12">    
     <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="10" name="messageBean">        
+      <attribute id="13" name="messageBean">        
         <position height="17" width="76" x="445" y="-112"/>      
       </attribute>      
-      <multiplicity id="11" minimum="0" maximum="1">        
+      <multiplicity id="14" minimum="0" maximum="1">        
         <position height="15" width="23" x="479" y="-96"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="8" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="12">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="13" name="rtspHandler">        
-        <position height="17" width="64" x="353" y="38"/>      
-      </attribute>      
-      <multiplicity id="14" minimum="0" maximum="1">        
-        <position height="15" width="23" x="365" y="54"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
   <association id="15">    
-    <bendpoint x="617" y="-184"/>    
-    <bendpoint x="793" y="-181"/>    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="16" name="streamStorageSetup">        
-        <position height="17" width="107" x="658" y="-221"/>      
-      </attribute>      
-      <multiplicity id="17" minimum="0" maximum="1">        
-        <position height="15" width="23" x="706" y="-204"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="4" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="18">    
-    <end type="SOURCE" refId="6"/>    
-    <end type="TARGET" refId="7"/>  
-  </dependency>  
-  <dependency id="19">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="8"/>  
-  </dependency>  
-  <association id="20">    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="21" name="rtspHandler"/>      
-      <multiplicity id="22" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="23">    
-    <bendpoint x="15" y="206"/>    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="7"/>  
-  </dependency>  
-  <association id="24">    
-    <bendpoint x="774" y="589"/>    
-    <bendpoint x="991" y="458"/>    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="25" name="streamStorageSetup">        
-        <position height="17" width="109" x="794" y="492"/>      
-      </attribute>      
-      <multiplicity id="26" minimum="0" maximum="1">        
-        <position height="15" width="23" x="838" y="510"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="4" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="27">    
     <bendpoint x="625" y="278"/>    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="28" name="messageBean">        
+      <attribute id="16" name="messageBean">        
         <position height="17" width="78" x="637" y="123"/>      
       </attribute>      
-      <multiplicity id="29" minimum="0" maximum="1">        
+      <multiplicity id="17" minimum="0" maximum="1">        
         <position height="15" width="23" x="669" y="140"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="8" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="30">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="6"/>  
-  </dependency>  
-  <dependency id="31">    
+  <association id="18">    
+    <bendpoint x="774" y="589"/>    
+    <bendpoint x="883" y="547"/>    
+    <bendpoint x="992" y="499"/>    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="19" name="streamStorageSetup">        
+        <position height="17" width="109" x="794" y="492"/>      
+      </attribute>      
+      <multiplicity id="20" minimum="0" maximum="1">        
+        <position height="15" width="23" x="838" y="510"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="21">    
     <end type="SOURCE" refId="1"/>    
     <end type="TARGET" refId="2"/>  
   </dependency>  
-  <dependency id="32">    
+  <association id="22">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="23" name="rtspHandler">        
+        <position height="17" width="64" x="353" y="38"/>      
+      </attribute>      
+      <multiplicity id="24" minimum="0" maximum="1">        
+        <position height="15" width="23" x="365" y="54"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="25">    
+    <bendpoint x="15" y="206"/>    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="26">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="27">    
     <bendpoint x="146" y="280"/>    
     <end type="SOURCE" refId="2"/>    
     <end type="TARGET" refId="3"/>  
   </dependency>  
-  <dependency id="33">    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="7"/>  
+  <dependency id="28">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
   </dependency>  
+  <association id="29">    
+    <bendpoint x="617" y="-184"/>    
+    <bendpoint x="793" y="-181"/>    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="30" name="streamStorageSetup">        
+        <position height="17" width="107" x="658" y="-221"/>      
+      </attribute>      
+      <multiplicity id="31" minimum="0" maximum="1">        
+        <position height="15" width="23" x="706" y="-204"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    
